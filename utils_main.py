@@ -40,9 +40,9 @@ logger.propagate = False
 if len(logger.handlers) > 1:
     for handler in logger.handlers:
         logger.removeHandler(handler)
-    del logger
-    logger = Logger().logger
-    logger.propagate = False
+    # del logger
+    # logger = Logger().logger
+    # logger.propagate = False
 
 def read_data(data_source_dir,
     fn_features_name,
