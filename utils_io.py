@@ -72,7 +72,7 @@ logger.propagate = False
 if len(logger.handlers) > 1:
     for handler in logger.handlers:
         logger.removeHandler(handler)
-    # del logger
+    del logger
     logger = Logger().logger
     logger.propagate = False
 
