@@ -60,7 +60,7 @@ def read_data(data_source_dir,
         logger.error(f"Файл Excel с Характеристиками из Наименования: '{fn_features_name}' не найден")
     if not os.path.exists(os.path.join(data_source_dir, fn_features_pre)):
         logger.error(f"Файл Excel с Характеристиками УМО ЕМИАС: '{fn_features_pre}' не найден")
-    df_04_plus_separated_parts_rows_upd_01 = pd.read_excel(os.path.join(data_source_dir, fn_features_name), sheet_name=sh_n_features_name) 
+    df_04_plus_separated_parts_rows_upd_01 = pd.read_excel(os.path.join(data_source_dir, fn_features_name), sheet_name=sh_n_features_name)
     logger.info(f"Файл Excel с Характеристиками из Наименования: (строк, колонок): {str(df_04_plus_separated_parts_rows_upd_01.shape)}")
     try:
         df_rm_characteristics_02 = pd.read_excel(os.path.join(data_source_dir, fn_features_pre), sheet_name=sh_n_features_pre, converters={'ИНП':str, 'Наименование СПГЗ':str})
@@ -80,15 +80,17 @@ def read_data(data_source_dir,
        'Тип выбора значения', 'Тип', 'Стандартизированная характеристика',
        'Специальная характеристика', 'КТРУ характеристика', 'ИНП',
        'Наименование СПГЗ', 'Наименование КПГЗ', 'Наименование вида',
-       'Наименование категории', 'Код КПГЗ нижнего уровня',
-       'Характеристика из названия']
+       'Наименование категории',
+       #'Код КПГЗ нижнего уровня',
+       #'Характеристика из названия'
+       ]
     if not set(req_cols_fn_features_pre).issubset(df_rm_characteristics_02.columns):
         logger.error(f"В файле Excel с Характеристиками УМО ЕМИАС отсутствует одна или несколько обязательных колонок: \n{str(req_cols_fn_features_pre)}")
 
     return df_04_plus_separated_parts_rows_upd_01, df_rm_characteristics_02
 
 def preprocess_data(df_04_plus_separated_parts_rows_upd_01, df_rm_characteristics_02):
-    
+
     df_04_plus_separated_parts_rows_upd_01['Наименование позиции upd'] = df_04_plus_separated_parts_rows_upd_01['Наименование позиции']
     df_04_plus_separated_parts_rows_upd_01['Наименование позиции'] = df_04_plus_separated_parts_rows_upd_01['Наименование позиции upd'].str.replace(r" +", " ",regex=True).str.strip()
     mask = df_04_plus_separated_parts_rows_upd_01['Наименование позиции'] != df_04_plus_separated_parts_rows_upd_01['Наименование позиции upd']
@@ -149,10 +151,12 @@ def merge_rm_features_step_02(
     df_rm_characteristics_04,
     debug=False
     ):
-    
+
     if debug: print("Исходный df_04_plus_separated_parts_rows_upd_01.shape:", df_04_plus_separated_parts_rows_upd_01.shape)
-    rm_cols = ['Характеристика из названия', 'Наименование вида',	'Наименование категории', 'Наименование КПГЗ',	'Код КПГЗ нижнего уровня', 'Наименование СПГЗ', 'ИНП', ]
-    rm_cols_str = 'pre."' + '", pre."'.join(rm_cols[:-2]+rm_cols[-1:]) + '"'
+    # rm_cols = ['Характеристика из названия', 'Наименование вида',	'Наименование категории', 'Наименование КПГЗ',	'Код КПГЗ нижнего уровня', 'Наименование СПГЗ', 'ИНП', ]
+    # rm_cols_str = 'pre."' + '", pre."'.join(rm_cols[:-2]+rm_cols[-1:]) + '"'
+    rm_cols = ['Наименование вида',	'Наименование категории', 'Наименование КПГЗ',	'Наименование СПГЗ', 'ИНП', ] # 'Характеристика из названия', 'Код КПГЗ нижнего уровня', 
+    rm_cols_str = 'pre."' + '", pre."'.join(rm_cols) + '"'
     rm_cols_str_02 = '"' + '", "'.join(rm_cols) + '"'
 
     # 'Наименование вида',	'Наименование категории' надо исключить из выборки df_04_plus_separated_parts_rows_upd_01 поскольку там они большими буквами ,
@@ -200,11 +204,12 @@ def merge_rm_features_step_03(
         'Наименование характеристики', 'Код ОКЕИ', 'Единица измерения', 'id значения характеристики', 'Значение характеристики', 'Условная операция',
         'Обязательная характеристика', 'Тип выбора значения', 'Тип', 'Стандартизированная характеристика', 'Специальная характеристика', 'КТРУ характеристика',
         'Наименование вида', 'Наименование категории',
-        'Код КПГЗ нижнего уровня', 'Наименование КПГЗ', 'Характеристика из названия',
+        'Наименование КПГЗ',
+        # 'Код КПГЗ нижнего уровня',  'Характеристика из названия',
         'Наименование СПГЗ', 'ИНП', 'Изделие', 'Наименование характеристики upd', 'Значение характеристики upd', ]]
     if debug: print("Исходный df_rm_characteristics_04.shape:", df_rm_characteristics_04.shape)
     if debug: print("Добавляемый df_rm_separated_parts_rows_02.shape:", df_rm_separated_parts_rows_02.shape)
-    need_cols = ['Наименование вида',	'Наименование категории', 'Код КПГЗ нижнего уровня', 'Наименование КПГЗ', 'Характеристика из названия'
+    need_cols = ['Наименование вида',	'Наименование категории', 'Наименование КПГЗ', #'Код КПГЗ нижнего уровня',  #'Характеристика из названия'
     ] + ['Наименование позиции', 'ИНП', 'Изделие', 'Характеристика название', 'Характеристика значение',]
     need_cols_str_02 = ', '.join(['NULL'] * (len(df_rm_characteristics_04.columns)- len(need_cols))) + ', "' + '", "'.join(need_cols) + '"'
     query = f"""
@@ -217,7 +222,7 @@ def merge_rm_features_step_03(
     df_rm_characteristics_05 = duckdb.query(query).df()
     if debug: print("Выхордной df_rm_characteristics_05.shape:", df_rm_characteristics_05.shape)
     df_rm_characteristics_05.rename(columns={'Наименование характеристики upd': 'Наименование характеристики 02', 'Значение характеристики upd': 'Значение характеристики 02'}, inplace=True)
-    df_rm_characteristics_05.sort_values(["Наименование СПГЗ", "ИНП", "Источник"], ascending=[True, True, False], inplace=True)    
+    df_rm_characteristics_05.sort_values(["Наименование СПГЗ", "ИНП", "Источник"], ascending=[True, True, False], inplace=True)
     return df_rm_characteristics_05
 # df_rm_characteristics_05 = merge_rm_features_step_03(df_rm_separated_parts_rows_02, df_rm_characteristics_04, debug=False)
 
@@ -225,7 +230,7 @@ def merge_rm_features_sub(
     df_04_plus_separated_parts_rows_upd_01,
     df_rm_characteristics_02,
     debug=False):
-  
+
 
     df_rm_characteristics_04 = merge_rm_features_step_01(df_04_plus_separated_parts_rows_upd_01,df_rm_characteristics_02)
     df_rm_separated_parts_rows_02 = merge_rm_features_step_02(df_04_plus_separated_parts_rows_upd_01, df_rm_characteristics_04, debug=False)
@@ -234,9 +239,9 @@ def merge_rm_features_sub(
 
     return df_rm_characteristics_05
 
-# df_rm_characteristics_05 = merge_rm_features_sub(df_04_plus_separated_parts_rows_upd_01, df_rm_characteristics_02, debug=False)   
+# df_rm_characteristics_05 = merge_rm_features_sub(df_04_plus_separated_parts_rows_upd_01, df_rm_characteristics_02, debug=False)
 def save_to_excel(
-    df_lst, 
+    df_lst,
     data_processed_dir,
     fn_main,
     sh_n_lst,
@@ -269,17 +274,17 @@ def save_to_excel(
 
     return fn_save
 
-def merge_rm_features_main(data_source_dir, data_processed_dir,   
+def merge_rm_features_main(data_source_dir, data_processed_dir,
         fn_features_name, sh_n_features_name,
         fn_features_pre, sh_n_features_pre,
         debug=False):
     df_04_plus_separated_parts_rows_upd_01, df_rm_characteristics_02 = read_data(
-        data_source_dir,    
+        data_source_dir,
         fn_features_name, sh_n_features_name,
         fn_features_pre, sh_n_features_pre,
         )
     df_04_plus_separated_parts_rows_upd_01, df_rm_characteristics_02 = preprocess_data(df_04_plus_separated_parts_rows_upd_01, df_rm_characteristics_02)
-    
+
     df_rm_characteristics_05 = merge_rm_features_sub(df_04_plus_separated_parts_rows_upd_01, df_rm_characteristics_02, debug=False)
 
     fn_save = save_to_excel(
@@ -292,12 +297,12 @@ def merge_rm_features_main(data_source_dir, data_processed_dir,
 
 
     return (
-        df_04_plus_separated_parts_rows_upd_01, df_rm_characteristics_02, df_rm_characteristics_05, fn_save 
+        df_04_plus_separated_parts_rows_upd_01, df_rm_characteristics_02, df_rm_characteristics_05, fn_save
     )
 
 # df_04_plus_separated_parts_rows_upd_01, df_rm_characteristics_02, df_rm_characteristics_05, fn_save = merge_rm_features_main(
-#     data_source_dir, data_processed_dir,    
+#     data_source_dir, data_processed_dir,
 #     fn_features_name = forms.fn_01, sh_n_features_name = forms.check_sheet_names_01_drop_down.value,
 #     fn_features_pre = forms.fn_02, sh_n_features_pre = forms.check_sheet_names_02_drop_down.value,
 #         debug=False
-# )    
+# )
